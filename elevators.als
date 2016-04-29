@@ -1,6 +1,6 @@
 //basic scenario with two separate elevators
-open util/ordering [Floor]
-open util/ordering[State]
+open util/ordering [Floor] as f
+open util/ordering[State] as s
 
 abstract sig Direction {}
 one sig Up extends Direction {}
@@ -10,8 +10,10 @@ abstract sig Floor {}
 
 sig Person {
 	start: one Floor,
-	destination: one Floor,
-	current: one Floor
+	destination: one Floor
+}
+{
+	start != destination
 }
 
 abstract sig Elevator {
@@ -24,7 +26,8 @@ one sig e1 extends Elevator {}
 one sig e2 extends Elevator {}
 
 sig State {
-	locations: set Elevator -> one Floor
+	locations: set Elevator -> one Floor,
+	people: set Person -> one Floor
 }
 
 sig Trace {
@@ -38,6 +41,13 @@ fact transitions {
 			one e: Trace | e.pre = s and e.post = s'
 }
 
-run{} for 6 Floor, 1 Up, 1 Down, 1 Person, 2 State, 1 Trace
+fact initial_state {
+	no (s/first.locations).Floor.passengers and
+	s/first.people = start	
+	
+
+}
+
+run{} for 6 Floor, 1 Up, 1 Down, exactly 1 Person, 2 State, 1 Trace
 
 
