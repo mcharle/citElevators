@@ -6,7 +6,7 @@ abstract sig Direction {}
 one sig Up extends Direction {}
 one sig Down extends Direction {}
 
-abstract sig Floor {}
+abstract sig Floor {} //should this even be abstract??
 
 sig Person {
 	start: one Floor,
