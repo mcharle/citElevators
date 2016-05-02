@@ -30,7 +30,8 @@ sig State{
 }
 
 // valid_move - checks if the elevator moved up or down one floor
-pred valid_move[pre: State, post: State] {
+// not every transition is a "move"
+pred move_transition[pre: State, post: State] {
 	(post.e.floor = pre.e.floor.next or
 	post.e.floor = pre.e.floor.prev) and
 	post.p.destination = pre.p.destination and
@@ -38,14 +39,16 @@ pred valid_move[pre: State, post: State] {
 	#{post.e.passengers} = #pre.e.passengers
 }
 
-pred load [pre: State, post: State] {
+// transition where elevator stays on same floor (not a "move")
+pred load_transition[pre: State, post: State] {
 	pre.e.floor = post.e.floor and
 	post.e.passengers = pre.e.passengers +
 		{pass : Person | pass in pre.p and pass.curr_floor = pre.e.floor and pass.curr_floor != pass.destination}
 	and pre.p = post.p
 }
 
-pred unload[pre: State, post:State] {
+// transition where elevator stays on same floor (not a "move")
+pred unload_transition[pre: State, post:State] {
 	pre.e.floor = post.e.floor and
 	post.e.passengers = pre.e.passengers - {pass: Person | pre.e.floor = pass.destination} and
 	pre.p = post.p
@@ -65,13 +68,13 @@ fact init{
 	no st/first.e.passengers
 }
 
-//transition - checks if the elevator has moved up or down one floor
+//transition - checks that the elevator moves, loads or unloads
 fact transition {
 	all s : State - st/last |
 		let s' = s.next |
-			valid_move[s, s'] or
-			load[s, s'] or
-			unload[s,s']
+			move_transition[s, s'] or
+			load_transition[s, s'] or
+			unload_transition[s,s']
 }
 
 //end_state - ensures that all people are at their destination floor in the last state
