@@ -43,6 +43,10 @@ pred unload_transition[pre: State, post:State] {
 	all elev : Elevator | elev.(post.passengers) = elev.(pre.passengers) - {pass: Person | elev.(pre.e) = pass.destination}
 }
 
+fact pickup {
+	all fl: Person.(st/first.p) | all el: Elevator | some st: State | el -> fl in st.e
+}
+
 //all people and elevators have to be in a State - not sure this is necessary at all?
 fact all_in_state {
 	all person :Person |
@@ -72,5 +76,4 @@ fact end_state {
 	no st/last.passengers
 }
 
-
-run{some p1, p2: Person | p1.destination != p2.destination} for exactly 6 Floor,  8 State, exactly 2 Elevator, exactly 2 Person
+run{some p1, p2: Person | p1.destination != p2.destination} for exactly 6 Floor,  4 State, exactly 2 Elevator, exactly 1 Person
