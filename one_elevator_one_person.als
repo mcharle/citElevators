@@ -63,7 +63,7 @@ fact all_in_state {
 }
 
 //in the beginning, the passenger isn't on their desired floor or on any elevator
-fact init{
+fact init {
 	st/first.p.curr_floor != st/first.p.destination and
 	no st/first.e.passengers
 }
