@@ -44,7 +44,8 @@ pred unload_transition[pre: State, post:State] {
 }
 
 fact pickup {
-	all fl: Person.(st/first.p) | all el: Elevator | some st: State | el -> fl in st.e
+	// forces both elevators to visit all floors that people are on
+	Elevator -> Person.destination in State.e
 }
 
 //all people and elevators have to be in a State - not sure this is necessary at all?
@@ -59,6 +60,8 @@ fact all_in_state {
 fact init {
 	all pass: Person | pass.(st/first.p) != pass.destination
 	no st/first.passengers
+	// forces people to be two floors apart
+	// some pass1: Person | some pass2: Person | pass2.destination = pass1.destination.next.next
 }
 
 //transition - checks that the elevator moves, loads or unloads
