@@ -45,7 +45,7 @@ pred unload_transition[pre: State, post:State] {
 
 fact pickup {
 	// forces both elevators to visit all floors that people end on
-	// Elevator -> Person.destination in State.e
+	//Elevator -> Person.destination in State.e
 	// forces both elevators to visit all floors that people start on
 	Elevator -> Person.(st/first.p) in State.e
 }
@@ -83,4 +83,4 @@ fact end_state {
 	no st/last.passengers
 }
 
-run{some p1, p2: Person | p1.destination != p2.destination} for exactly 6 Floor,  6 State, exactly 2 Elevator, exactly 2 Person
+run{} for exactly 6 Floor, 5 State, exactly 2 Elevator, exactly 2 Person
