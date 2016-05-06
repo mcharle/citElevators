@@ -43,11 +43,11 @@ pred unload_transition[pre: State, post:State] {
 	all elev : Elevator | elev.(post.passengers) = elev.(pre.passengers) - {pass: Person | elev.(pre.e) = pass.destination}
 }
 
-fact pickup {
-	// forces both elevators to visit all floors that people end on
-	//Elevator -> Person.destination in State.e
-	// forces both elevators to visit all floors that people start on
-	Elevator -> Person.(st/first.p) in State.e
+// forces both elevators to visit all floors that people start on in order to simulate always
+// calling both elevators
+pred original_elevators {
+
+    Elevator -> Person.(st/first.p) in State.e
 }
 
 //all people and elevators have to be in a State - not sure this is necessary at all?
@@ -62,10 +62,20 @@ fact all_in_state {
 fact init {
 	all pass: Person | pass.(st/first.p) != pass.destination
 	no st/first.passengers
-	// forces people to end two floors apart
+}
+
+// forces people to end two floors apart
+pred end_apart {
 	some pass1: Person | some pass2: Person | pass2.destination = pass1.destination.next.next
-	// forces people to start two floors apart
+}
+
+// forces people to start two floors apart
+pred start_apart {
 	some pass1: Person | some pass2: Person | pass2.(st/first.p) = pass1.(st/first.p).next.next
+}
+
+pred below_fourth {
+	some e1: Elevator | all st: State | e1.(st.e) in f/prev[f/last.prev.prev]
 }
 
 //transition - checks that the elevator moves, loads or unloads
@@ -83,4 +93,5 @@ fact end_state {
 	no st/last.passengers
 }
 
-run{} for exactly 6 Floor, 5 State, exactly 2 Elevator, exactly 2 Person
+run{start_apart and original_elevators} for exactly 6 Floor, 5 State, exactly 2 Elevator, exactly 2 Person
+run{start_apart} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
