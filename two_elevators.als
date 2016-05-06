@@ -78,6 +78,18 @@ pred below_fourth {
 	some e1: Elevator | all st: State | e1.(st.e) in f/prevs[f/last.prev.prev]
 }
 
+pred diff_floors {
+	some p1, p2: Person | p1.destination != p2.destination
+}
+
+pred start_on_first {
+	Elevator.(st/first.e) = f/first
+}
+
+pred all_floors_used {
+	Person.destination + Person.(st/first.p) = Floor
+}
+
 //transition - checks that the elevator moves, loads or unloads
 fact transition {
 	all s : State - st/last |
@@ -93,6 +105,7 @@ fact end_state {
 	no st/last.passengers
 }
 
-run{start_apart and original_elevators} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
-run{start_apart} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
-run{start_apart and below_fourth} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
+run{start_apart and original_elevators and end_apart} for exactly 6 Floor, 5 State, exactly 2 Elevator, exactly 2 Person
+run{start_apart and end_apart} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
+run{start_apart and below_fourth and end_apart} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
+run{all_floors_used} for exactly 6 Floor, 9 State, exactly 2 Elevator, exactly 3 Person
