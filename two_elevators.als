@@ -75,7 +75,7 @@ pred start_apart {
 }
 
 pred below_fourth {
-	some e1: Elevator | all st: State | e1.(st.e) in f/prev[f/last.prev.prev]
+	some e1: Elevator | all st: State | e1.(st.e) in f/prevs[f/last.prev.prev]
 }
 
 //transition - checks that the elevator moves, loads or unloads
@@ -93,5 +93,6 @@ fact end_state {
 	no st/last.passengers
 }
 
-run{start_apart and original_elevators} for exactly 6 Floor, 5 State, exactly 2 Elevator, exactly 2 Person
+run{start_apart and original_elevators} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
 run{start_apart} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
+run{start_apart and below_fourth} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
