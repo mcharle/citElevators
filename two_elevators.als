@@ -1,9 +1,8 @@
 open util/ordering [Floor] as f
 open util/ordering [State] as st
 
-// floor - there should be 6 of these in order
+// there should be 6 of these in order
 sig Floor{}
-
 sig Elevator{}
 
 sig Person {
@@ -20,33 +19,31 @@ sig State{
 
 // valid_move - checks if the elevator moved up or down one floor
 // not every transition is a "move"
-pred move_transition[pre: State, post: State] {
-	all elev : Elevator | {elev.(post.e) = elev.(pre.e).next or elev.(post.e) = elev.(pre.e).prev}
-	//is it implied that all people are in p?
-	post.passengers = pre.passengers and
-	all per: Person | !(per in Elevator.(pre.passengers)) implies pre.p = post.p
+pred move_transition[pre: State, post: State, elev : Elevator] {
+	elev.(post.e) = elev.(pre.e).next or elev.(post.e) = elev.(pre.e).prev
+	elev.(post.passengers) = elev.(pre.passengers) //and
+//	all per: Person | !(per in Elevator.(pre.passengers)) implies pre.p = post.p //??
 }
 
 // transition where elevator stays on same floor (not a "move")
-pred load_transition[pre: State, post: State] {
-	pre.p = post.p and
-	pre.e = post.e and
-	all elev : Elevator | elev.(post.passengers) = elev.(pre.passengers) +
+pred load_transition[pre: State, post: State, elev: Elevator] {
+	elev.(post.passengers) <: pre.p = elev.(post.passengers) <: post.p and
+	elev.(pre.e) = elev.(post.e) and
+	elev.(post.passengers) = elev.(pre.passengers) +
 		{pass : Person | pass.(pre.p) = elev.(pre.e) and pass.(pre.p) != pass.destination and
 		post.passengers.pass = elev}
 }
 
 // transition where elevator stays on same floor (not a "move")
-pred unload_transition[pre: State, post:State] {
-	pre.p = post.p and
-	pre.e = post.e and
-	all elev : Elevator | elev.(post.passengers) = elev.(pre.passengers) - {pass: Person | elev.(pre.e) = pass.destination}
+pred unload_transition[pre: State, post:State, elev: Elevator] {
+	elev.(pre.passengers) <: pre.p = elev.(pre.passengers) <: post.p and
+	elev.(pre.e) = elev.(post.e) and
+	elev.(post.passengers) = elev.(pre.passengers) - {pass: Person | elev.(pre.e) = pass.destination}
 }
 
 // forces both elevators to visit all floors that people start on in order to simulate always
 // calling both elevators
 pred original_elevators {
-
     Elevator -> Person.(st/first.p) in State.e
 }
 
@@ -83,7 +80,7 @@ pred diff_floors {
 }
 
 pred start_on_first {
-	Elevator.(st/first.e) = f/first
+	Elevator.(st/first.e) = f/first.next
 }
 
 pred all_floors_used {
@@ -94,9 +91,11 @@ pred all_floors_used {
 fact transition {
 	all s : State - st/last |
 		let s' = s.next |
-			move_transition[s, s'] or
-			load_transition[s, s'] or
-			unload_transition[s,s']
+			(Person - Elevator.(s.passengers + s'.passengers)) <: s.p = ( Person - Elevator.(s.passengers + s'.passengers)) <: s'.p and
+			all elev: Elevator |
+				move_transition[s, s', elev] or
+				load_transition[s, s', elev] or
+				unload_transition[s,s',elev]
 }
 
 //end_state - ensures that all people are at their destination floor in the last state
@@ -105,7 +104,17 @@ fact end_state {
 	no st/last.passengers
 }
 
+assert no_jump {
+	all s : State - st/last |
+		let s' = s.next |
+			all per : Person |
+				per.(s.p) != per.(s'.p) implies per in Elevator.(s.passengers) and move_transition[s, s', s.passengers.per]
+}
+check no_jump for exactly 6 Floor, 5 State, exactly 2 Elevator, exactly 2 Person
+
+
+run{diff_floors and start_on_first and below_fourth} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
 run{start_apart and original_elevators and end_apart} for exactly 6 Floor, 5 State, exactly 2 Elevator, exactly 2 Person
-run{start_apart and end_apart} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
+run two_apart {start_apart and end_apart and below_fourth and start_on_first} for exactly 6 Floor, 5 State, exactly 2 Elevator, exactly 2 Person
 run{start_apart and below_fourth and end_apart} for exactly 6 Floor, 4 State, exactly 2 Elevator, exactly 2 Person
-run{all_floors_used} for exactly 6 Floor, 9 State, exactly 2 Elevator, exactly 3 Person
+run all_floors {all_floors_used and below_fourth and start_on_first} for exactly 6 Floor, 9 State, exactly 2 Elevator, exactly 3 Person
