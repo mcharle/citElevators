@@ -14,3 +14,12 @@ We tested these systems on three passenger scenarios, all designed using predica
 | Both Called, Start on 1st| 4 | 6 | 9 | 6.33 |
 | One Below Fourth Floor| 4 | 4 | 8 | 5.33 |
 | One Below 4th, Start on 1st| 4 | 5 | 9 | 6 |
+
+
+All of the systems had the same result for two passenges with different destinations, because there was always a way to place the passengers so that each elevator could transport a passenger in the minimum number of states.
+
+When passengers start and end two floors apart, only the nonrestricted system and the system where one elevator says below the fourth can finish in 4 states. When both elevators are called, no matter where they start, they both have to end up visiting a floor 2 floors away from where they started. In the best case, when both elevators start on the first floor, one passenger will be on the first floor and the other will be two above on the third. Then they'll both transport their elevators two floors up. This takes a minimum of 5 steps.
+
+When all floors are used by passengers (picked up or dropped off), the minimum number of steps is 8, because it takes 6 steps to visit every floor going top to bottom or bottom to top, and 2 for loading/unloading a passenger. Forcing elevators to start on the 1st means that at least one has to backtrack and pick someone up or drop someone up at the basement. Calling both elevators generally increases the number of steps because an elevator has to visit floors unreleated to transporting its passengers. Only nonrestricted and below fourth systems met the minimum.
+
+We took the average of these situations. No restrictions and keeping one elevator below the 4th tied for the smallest average (5.33), followed by starting on the first floor, calling both elevators, one below the 4th with starting on the first floor (all 6) and finally both elevators called and starting on the first (6.33). Calling both elevators and forcing them to start on the first floor most closely resembles how the CIT elevators currently operate. Many people enter the CIT on the first floor, call both elevators and then take the stairs when they leave. Unfortunately, according to our model, this is to the slowest option.
